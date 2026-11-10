@@ -100,7 +100,7 @@ def washout():
         b.append(t(sx(a) + 12, y + 26, f"{a:.1f}", 28, "start", 400, MUTE))
         b.append(t(max(sx(c), x0 + 8) + 12, y + 62, f"{c:.1f}", 28, "start", 700, OR_D))
         b.append(t(w - 10, y + 48, f"{1 - c / a:.0%} gone", 38, "end", 700, NAVY))
-    b.append(t((x0 + x1) / 2, h - 10, "Places gained over the clean twin", 32, "middle", 700, MUTE))
+    b.append(t((x0 + x1) / 2, h - 10, "Places gained over the clean twin (new adapter per update)", 30, "middle", 700, MUTE))
     return w, h, svg(w, h, b)
 
 
@@ -166,6 +166,7 @@ def rollback():
     b.append(t(x1 + 30, sy(0) + 38, "Clean run = 0", 32, "start", 400, MUTE))
     b.append(t(x1 + 30, sy(gone[-1]) + 14, "Deleted: −1.9", 38, "start", 700, NAVY))
     b.append(ytitle(48, (y0 + y1) / 2, "Places vs clean"))
+    b.append(t(x1 - 10, y1 + 10, "mean of crude and copied fakes", 26, "end", 500, MUTE))
     b.append(t((x0 + x1) / 2, h - 10, "Update (1 = poisoned, 2–4 = clean)", 32, "middle", 700, MUTE))
     return w, h, svg(w, h, b)
 
