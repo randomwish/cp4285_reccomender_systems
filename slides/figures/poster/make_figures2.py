@@ -180,50 +180,50 @@ def dose():
     return w, h, svg(w, h, b)
 
 
-def chip(x, y, label, kind="real", wd=152):
+def chip(x, y, label, kind="real", wd=200):
     if kind == "target":
-        return [rect(x, y, wd, 56, OR_T, 10, OR_D, 3), t(x + wd / 2, y + 37, label, 25, "middle", 700, OR_D)]
-    return [rect(x, y, wd, 56, GREY_T, 10, "#CBD3DE", 2), t(x + wd / 2, y + 37, label, 25, "middle", 400, INK)]
+        return [rect(x, y, wd, 66, OR_T, 12, OR_D, 3), t(x + wd / 2, y + 45, label, 34, "middle", 700, OR_D)]
+    return [rect(x, y, wd, 66, GREY_T, 12, "#CBD3DE", 2), t(x + wd / 2, y + 45, label, 34, "middle", 400, INK)]
 
 
 def attacks():
-    """2x2 panels showing what each attack does to a purchase history."""
+    """2x2 panels showing what each attack does to a purchase history (v3: larger text)."""
     w, h = 1430, 820
     pw, ph, g = 700, 395, 30
     panels = [
         ("Crude fake shoppers", "Push +2.1 places · easy to spot", [
-            ("New fake account", ["Popular", "Keyboards", "Popular", "Keyboards"], True),
-            ("Another fake account", ["Keyboards", "Popular", "Keyboards", "Popular"], True)]),
+            ("Fake account", ["Popular", "Keyboards", "Popular"], True),
+            ("Another fake account", ["Keyboards", "Popular", "Keyboards"], True)]),
         ("Copied fake shoppers", "Push +2.2 places · harder to spot", [
-            ("Real shopper", ["Guitars", "Strings", "Cables", "Picks"], False),
-            ("Fake copy", ["Guitars", "Keyboards", "Cables", "Keyboards"], True)]),
+            ("Real shopper", ["Guitars", "Strings", "Cables"], False),
+            ("Fake copy", ["Guitars", "Keyboards", "Cables"], True)]),
         ("Edited real histories", "Push +4.8 places · no new accounts", [
-            ("Real shopper, before", ["Guitars", "Strings", "Cables"], False),
-            ("Same shopper, edited", ["Guitars", "Keyboards", "Strings", "Cables"], False)]),
+            ("Real shopper, before", ["Guitars", "Strings"], False),
+            ("Same shopper, edited", ["Guitars", "Keyboards", "Strings"], False)]),
         ("Re-listed products", "Push +7.7 places · no accounts at all", None),
     ]
     b = []
     for k, (title, foot, rows) in enumerate(panels):
         px, py = (k % 2) * (pw + g), (k // 2) * (ph + g)
         b.append(rect(px + 2, py + 2, pw - 4, ph - 4, "#FFFFFF", 18, "#C9D6E6", 3))
-        b.append(t(px + 28, py + 56, title, 38, "start", 700, OR_D))
+        b.append(t(px + 28, py + 56, title, 42, "start", 700, OR_D))
         if rows:
             for r, (lab, items, fake) in enumerate(rows):
-                ry = py + 92 + r * 120
-                b.append(t(px + 28, ry + 26, lab, 27, "start", 400, MUTE))
+                ry = py + 84 + r * 128
+                b.append(t(px + 28, ry + 28, lab, 30, "start", 400, MUTE))
                 if fake:
-                    b.append(rect(px + 18, ry + 36, pw - 36, 76, "none", 12, MUTE, 2, "8 6"))
+                    b.append(rect(px + 16, ry + 36, 3 * 200 + 2 * 14 + 28, 84, "none", 14, MUTE, 2, "8 6"))
                 for j, it in enumerate(items):
-                    b += chip(px + 30 + j * 162, ry + 46, it, "target" if it == "Keyboards" else "real")
+                    b += chip(px + 30 + j * 214, ry + 45, it, "target" if it == "Keyboards" else "real")
         else:
             for r, (lab, cat, kind) in enumerate([("Before: a strings set, listed under", "Strings", "real"),
                                                   ("After: the same set, listed under", "Keyboards", "target")]):
-                ry = py + 92 + r * 120
-                b.append(t(px + 28, ry + 26, lab, 27, "start", 400, MUTE))
-                b += chip(px + 30, ry + 46, "Strings set", "real", 200)
-                b.append(t(px + 258, ry + 86, "→", 40, "middle", 700, MUTE))
-                b += chip(px + 300, ry + 46, cat, kind, 200)
-        b.append(t(px + 28, py + ph - 30, foot, 30, "start", 700, NAVY))
+                ry = py + 84 + r * 128
+                b.append(t(px + 28, ry + 28, lab, 30, "start", 400, MUTE))
+                b += chip(px + 30, ry + 45, "Strings set", "real", 230)
+                b.append(t(px + 300, ry + 92, "→", 44, "middle", 700, MUTE))
+                b += chip(px + 340, ry + 45, cat, kind, 220)
+        b.append(t(px + 28, py + ph - 28, foot, 32, "start", 700, NAVY))
     return w, h, svg(w, h, b)
 
 
@@ -242,7 +242,7 @@ if __name__ == "__main__":
     out = pathlib.Path(sys.argv[1])
     out.mkdir(parents=True, exist_ok=True)
     for name, fn in [("washout-v2", washout), ("residue-v2", residue), ("rollback-v2", rollback),
-                     ("dose-v2", dose), ("attacks-v2", attacks)]:
+                     ("dose-v2", dose), ("attacks-v3", attacks)]:
         w, h, m = fn()
         render(out, name, w, h, m)
         print(name, w, h)
