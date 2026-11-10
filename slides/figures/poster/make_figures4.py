@@ -283,7 +283,7 @@ def model():
     b.append(t(ox + 22, 136, "Full token vocabulary", L - 2, "start", 500, INK))
     b.append(t(ox + 22, 168, "at each position", S - 1, "start", 500, MUTE))
     for k in range(5):
-        b.append(rect(ox + 22 + k * 50, 190, 38, 38, MBLUE, 6, INK, 2))
+        b.append(rect(ox + 22 + k * 50, 190, 38, 38, WHITE, 6, INK, 2))
     b.append(t(ox + 22 + 5 * 50 + 8, 222, "…", L, "start", 700, INK))
     b.append(t(ox + 22, 290, "Token", L - 1, "start", 600, INK))
     b.append(t(ox + 22, 326, "log-probabilities", L - 1, "start", 600, INK))
@@ -302,7 +302,7 @@ def model():
     b.append(t(sx_ + 20, yb + 118, "one score per full name", S - 1, "start", 500, MUTE))
     qx, qw = 424, 160
     b.append(arrow(sx_ - 6, yb + hb / 2, qx + qw + 8, yb + hb / 2, INK, 5))
-    b.append(rect(qx, yb + 30, qw, hb - 60, MBLUE, 18, INK, 3))
+    b.append(rect(qx, yb + 30, qw, hb - 60, WHITE, 18, INK, 3))
     b.append(t(qx + qw / 2, yb + hb / 2 + 10, "Sort", L, "middle", 700, INK))
     b.append(arrow(qx - 6, yb + hb / 2, 366, yb + hb / 2, INK, 5))
     b.append(rect(2, yb, 356, hb, WHITE, 18, INK, 3))
@@ -316,8 +316,8 @@ def model():
 # ------------------------------------------------------------------ LoRA schematic (after Hu et al., 2021)
 def lora():
     W, H = 440, 330
-    b = [rect(110, 296, 210, 26, "#FFE680", 4, INK, 2), t(94, 318, "x", L, "end", 700, INK),
-         rect(110, 6, 210, 26, "#FFE680", 4, INK, 2), t(94, 28, "h", L, "end", 700, INK)]
+    b = [rect(110, 296, 210, 26, WHITE, 4, INK, 2), t(94, 318, "x", L, "end", 700, INK),
+         rect(110, 6, 210, 26, WHITE, 4, INK, 2), t(94, 28, "h", L, "end", 700, INK)]
     b.append(rect(6, 84, 196, 168, GREY, 14, INK, 3))
     b.append(t(104, 124, "Pretrained", L - 3, "middle", 700, INK))
     b.append(t(104, 156, "weights W", L - 3, "middle", 700, INK))
@@ -391,9 +391,9 @@ def washout():
 
 
 DOSES = [0.25, 0.5, 1, 2, 3, 5]
-DOM = [("Instruments", 30, 55, BLUE, "circle", [0.076, 0.000, 0.237, 0.434, 0.429, 0.503]),
-       ("Video Games", 43, 25, RED, "square", [0.008, 0.089, 0.161, 0.301, 0.431, 0.531]),
-       ("CDs & Vinyl", 59, 13, INK, "triangle", [0.063, 0.146, 0.239, 0.399, 0.417, 0.526])]
+DOM = [("Instruments", 30, 55, NAVY, "circle", [0.076, 0.000, 0.237, 0.434, 0.429, 0.503]),
+       ("Video Games", 43, 25, "#6378A6", "square", [0.008, 0.089, 0.161, 0.301, 0.431, 0.531]),
+       ("CDs & Vinyl", 59, 13, "#A3B1CF", "triangle", [0.063, 0.146, 0.239, 0.399, 0.417, 0.526])]
 
 
 def dose():
@@ -488,7 +488,7 @@ def residue():
             ("Edit real histories", 13.4, 38.1), ("Change product labels", 13.3, 25.3)]
     x0, x1, lo, hi = 380, 1430, -10, 50
     sx = lambda v: x0 + (v - lo) / (hi - lo) * (x1 - x0)
-    b = [dot(x0 + 14, 22, MUTE, 12), t(x0 + 36, 31, "Reuse one adapter", L - 3, "start", 600, INK),
+    b = [dot(x0 + 14, 22, INK, 12), t(x0 + 36, 31, "Reuse one adapter", L - 3, "start", 600, INK),
          dot(x0 + 380, 22, BLUE, 11, "diamond"), t(x0 + 404, 31, "Add a new adapter per update", L - 3, "start", 600, INK)]
     top, step = 100, 62
     base = top + 3 * step + 40
@@ -504,11 +504,11 @@ def residue():
     for k, (name, r, n) in enumerate(rows):
         y = top + k * step
         b.append(t(sx(lo) - 18, y + 8, name, L - 3, "end", 600, INK))
-        b.append(ln(sx(r), y, sx(n), y, LBLUE, 9))
-        b.append(dot(sx(r), y, MUTE, 12))
+        b.append(ln(sx(r), y, sx(n), y, GRID, 9))
+        b.append(dot(sx(r), y, INK, 12))
         b.append(dot(sx(n), y, BLUE, 11, "diamond"))
         b.append(t(sx(n) + 24, y + 8, f"{n:.0f}%", S, "start", 700, BLUE))
-        b.append(t(sx(r), y - 20, f"{r:.0f}%".replace("-", "−"), S, "middle", 700, MUTE))
+        b.append(t(sx(r), y - 20, f"{r:.0f}%".replace("-", "−"), S, "middle", 700, INK))
     b.append(t((sx(lo) + x1) / 2, H - 4, "Share of the attack's rank gain left after one update with real reviews", S, "middle", 700, MUTE))
     return W, H, svg(W, H, b)
 
@@ -524,8 +524,8 @@ def render(out, name, w, h, markup):
     page.unlink()
 
 
-FIGS = [("v4-pipeline", pipeline), ("v4-poison", poison), ("v4-attacks", attacks), ("v4-model", model),
-        ("v4-lora", lora), ("v4-washout", washout), ("v4-dose", dose), ("v4-stack", stack), ("v4-residue", residue)]
+FIGS = [("v4-pipeline", pipeline), ("v4-poison", poison), ("v4-attacks", attacks), ("v5-model", model),
+        ("v5-lora", lora), ("v4-washout", washout), ("v5-dose", dose), ("v4-stack", stack), ("v5-residue", residue)]
 
 if __name__ == "__main__":
     out = pathlib.Path(sys.argv[1]).resolve()
