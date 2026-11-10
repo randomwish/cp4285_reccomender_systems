@@ -260,6 +260,90 @@ def attacks():
     return w, h, svg(w, h, b)
 
 
+# Push by block from docs/CONTINUED-TRAINING.md (attack catalogue, mean of 9 domain-seed pairs);
+# negative rank change = the target moved up. Order: crude, copied, edited, re-listed.
+REUSE = [(-2.53, 0.22, 0.11, 0.10), (-2.31, 0.16, 0.20, 0.01), (-4.69, -0.63, -0.18, -0.12), (-7.44, -0.99, -0.56, -0.09)]
+NEW = [(-2.14, -0.59, -0.13, -0.13), (-2.23, -0.88, -0.36, -0.26), (-4.80, -1.83, -1.14, -0.80), (-7.68, -1.94, -1.55, -1.18)]
+REUSE_C, NEW_C = "#55556A", "#2F5FCC"
+
+
+def left(rows):
+    """Share of the block-1 push still there at each update, per attack."""
+    return [[r[i] / r[0] * 100 for i in range(4)] for r in rows]
+
+
+def designs():
+    """Share of the push left after each update, mean of four attacks with their range, per design."""
+    w, h = 1430, 500
+    x0, x1, y0, y1 = 190, 1060, 390, 40
+    pad = 50
+    lo, hi = -20, 100
+    sx = lambda i: x0 + pad + i / 3 * (x1 - x0 - 2 * pad)
+    sy = lambda v: y0 + (v - lo) / (hi - lo) * (y1 - y0)
+    b = []
+    for v in (0, 25, 50, 75, 100):
+        b.append(ln(x0, sy(v), x1, sy(v), MUTE if v == 0 else GRID, 3 if v == 0 else 2, "10 8" if v == 0 else None))
+    for v in (-20, 0, 25, 50, 75, 100):
+        b.append(ln(x0 - 12, sy(v), x0, sy(v), INK, 3))
+        b.append(t(x0 - 20, sy(v) + 11, f"{v}%".replace("-", "−"), 30, "end", 500, MUTE))
+    out = {}
+    for name, rows, col, fill in (("reuse", REUSE, REUSE_C, "#E4DCCB"), ("new", NEW, NEW_C, "#C7D6F5")):
+        L = left(rows)
+        mean = [sum(c) / 4 for c in zip(*L)]
+        mn, mx = [min(c) for c in zip(*L)], [max(c) for c in zip(*L)]
+        b.append(area([(sx(i), sy(v)) for i, v in enumerate(mx)], [(sx(i), sy(v)) for i, v in enumerate(mn)], fill))
+        out[name] = (mean, col)
+    for name, (mean, col) in out.items():
+        b.append(poly([(sx(i), sy(v)) for i, v in enumerate(mean)], col))
+        for i, v in enumerate(mean):
+            b.append(dot(sx(i), sy(v), col, 14, "circle" if name == "reuse" else "diamond"))
+    rm, nm = out["reuse"][0], out["new"][0]
+    b.append(t(sx(1) + 18, sy(nm[1]) - 18, f"{nm[1]:.0f}%", 34, "start", 700, NEW_C))
+    b.append(t(sx(1) + 18, sy(rm[1]) + 44, f"{rm[1]:.0f}%", 34, "start", 700, REUSE_C))
+    b.append(t(x1 + 30, sy(nm[3]) - 30, "New adapter", 32, "start", 700, NEW_C))
+    b.append(t(x1 + 30, sy(nm[3]) + 10, f"per update: {nm[3]:.0f}% left", 32, "start", 700, NEW_C))
+    b.append(t(x1 + 30, sy(rm[3]) + 50, "Reuse one adapter:", 32, "start", 700, REUSE_C))
+    b.append(t(x1 + 30, sy(rm[3]) + 90, f"{abs(rm[3]):.0f}% left", 32, "start", 700, REUSE_C))
+    b.append(axis(x0, y1, x0, y0))
+    b.append(axis(x0, y0, x1, y0))
+    for i in range(4):
+        b.append(ln(sx(i), y0, sx(i), y0 + 12, INK, 3))
+        b.append(t(sx(i), y0 + 44, str(i + 1), 30, "middle", 500, MUTE))
+    b.append(ytitle(48, (y0 + y1) / 2, "Push still there"))
+    b.append(t((x0 + x1) / 2, h - 10, "Update (1 = poisoned, 2–4 = clean) · line: mean of 4 attacks, band: range", 28, "middle", 700, MUTE))
+    print("reuse", [round(v, 1) for v in rm], "new", [round(v, 1) for v in nm])
+    return w, h, svg(w, h, b)
+
+
+def compare():
+    """Side-by-side summary of the two designs."""
+    w, h = 1430, 560
+    lx, cw, g = 470, 455, 25
+    cx = [lx, lx + cw + g]
+    b = []
+    for k, (lab, col) in enumerate((("Reuse one adapter", REUSE_C), ("New adapter per update", NEW_C))):
+        b.append(rect(cx[k], 6, cw, 72, col, 36, INK, 4))
+        b.append(t(cx[k] + cw / 2, 54, lab, 34, "middle", 700, "#FFFFFF"))
+    rl, nl = left(REUSE), left(NEW)
+    rows = [
+        ("Push right after the attack", f"+{min(-r[0] for r in REUSE):.1f} to +{max(-r[0] for r in REUSE):.1f} places",
+         f"+{min(-r[0] for r in NEW):.1f} to +{max(-r[0] for r in NEW):.1f} places"),
+        ("Left after 1 clean update", f"{min(r[1] for r in rl):.0f}% to {max(r[1] for r in rl):.0f}%",
+         f"{min(r[1] for r in nl):.0f}% to {max(r[1] for r in nl):.0f}%"),
+        ("Left after 3 clean updates", f"{min(r[3] for r in rl):.0f}% to {max(r[3] for r in rl):.0f}%",
+         f"{min(r[3] for r in nl):.0f}% to {max(r[3] for r in nl):.0f}%"),
+        ("Delete the bad update?", "Not possible", "Yes (see below)"),
+    ]
+    for k, (lab, a, c) in enumerate(rows):
+        y = 100 + k * 114
+        b.append(t(lx - 24, y + 60, lab, 32, "end", 700, INK))
+        for j, (val, col) in enumerate(((a, REUSE_C), (c, NEW_C))):
+            b.append(rect(cx[j], y, cw, 92, "#FFFFFF", 18, INK, 3))
+            b.append(t(cx[j] + cw / 2, y + 60, val.replace("-", "−"), 36, "middle", 700, col))
+    print(rows)
+    return w, h, svg(w, h, b)
+
+
 def mark():
     """The canvas's Forget-Me-Not flower, on its yellow badge."""
     return 600, 600, pathlib.Path(__file__).with_name("mark.svg").read_text()
@@ -281,7 +365,8 @@ if __name__ == "__main__":
     out = pathlib.Path(sys.argv[1])
     out.mkdir(parents=True, exist_ok=True)
     for name, fn in [("washout-v5", washout), ("residue-v5", residue), ("rollback-v5", rollback),
-                     ("dose-v5", dose), ("attacks-v5", attacks), ("mark", mark)]:
+                     ("dose-v5", dose), ("attacks-v5", attacks), ("mark", mark),
+                     ("designs-v7", designs), ("compare-v7", compare)]:
         w, h, m = fn()
         render(out, name, w, h, m)
         print(name, w, h)
