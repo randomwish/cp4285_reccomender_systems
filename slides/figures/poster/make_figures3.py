@@ -208,7 +208,7 @@ def dose():
         b.append(ln(sx(d), y0, sx(d), y0 + 12, INK, 3))
         b.append(t(sx(d), y0 + 44, f"{d:g}%", 30, "middle", 400, MUTE))
     b.append(t(x1 - 10, y0 - 18, "line: mean of 3 domains · band: range", 26, "end", 400, MUTE))
-    b.append(ytitle(48, (y0 + y1) / 2, "Gap to #1 closed"))
+    b.append(ytitle(48, (y0 + y1) / 2, "Climb toward #1"))
     b.append(t((x0 + x1) / 2, h - 10, "Poisoned share of the update (log scale)", 32, "middle", 700, MUTE))
     return w, h, svg(w, h, b)
 
@@ -365,7 +365,7 @@ if __name__ == "__main__":
     out = pathlib.Path(sys.argv[1])
     out.mkdir(parents=True, exist_ok=True)
     for name, fn in [("washout-v5", washout), ("residue-v5", residue), ("rollback-v5", rollback),
-                     ("dose-v5", dose), ("attacks-v5", attacks), ("mark", mark),
+                     ("dose-v8", dose), ("attacks-v5", attacks), ("mark", mark),
                      ("designs-v7", designs), ("compare-v7", compare)]:
         w, h, m = fn()
         render(out, name, w, h, m)
