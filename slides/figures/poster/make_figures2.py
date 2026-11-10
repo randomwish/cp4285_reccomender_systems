@@ -64,26 +64,41 @@ def svg(w, h, body):
 ATTACKS = ["Re-listed products", "Edited real histories", "Copied fake shoppers", "Crude fake shoppers"]
 
 
+def ytitle(x, y, s, size=32):
+    return (f'<text x="{x:.1f}" y="{y:.1f}" font-size="{size}" text-anchor="middle" font-weight="700" '
+            f'fill="{MUTE}" transform="rotate(-90 {x:.1f} {y:.1f})">{esc(s)}</text>')
+
+
+def axis(x0, y0, x1, y1):
+    return ln(x0, y0, x1, y1, INK, 3)
+
+
 def washout():
     """Places gained right after the poisoned update and after three clean updates (new adapter per update)."""
     w, h = 1430, 520
     rows = [(7.68, 1.18), (4.80, 0.80), (2.23, 0.26), (2.14, 0.13)]
     lx, x0, x1 = 400, 420, 1150
     sx = lambda v: x0 + v / 8 * (x1 - x0)
-    b = [rect(x0, 18, 34, 34, OR_L, 6), t(x0 + 48, 47, "Right after the attack", 34),
-         rect(x0 + 470, 18, 34, 34, OR_D, 6), t(x0 + 518, 47, "After 3 clean updates", 34)]
-    top, step = 100, 100
+    b = [rect(x0, 14, 30, 30, OR_L, 6), t(x0 + 42, 40, "Right after the attack", 32),
+         rect(x0 + 420, 14, 30, 30, OR_D, 6), t(x0 + 462, 40, "After 3 clean updates", 32)]
+    top, step = 84, 86
+    base = top + 4 * step - 10
+    for v in (2, 4, 6, 8):
+        b.append(ln(sx(v), top - 12, sx(v), base))
     for v in (0, 2, 4, 6, 8):
-        b.append(ln(sx(v), top - 14, sx(v), top + 4 * step - 22))
+        b.append(ln(sx(v), base, sx(v), base + 12, INK, 3))
+        b.append(t(sx(v), base + 44, str(v), 30, "middle", 400, MUTE))
+    b.append(axis(x0, top - 12, x0, base))
+    b.append(axis(x0, base, x1, base))
     for k, (name, (a, c)) in enumerate(zip(ATTACKS, rows)):
         y = top + k * step
-        b.append(t(lx, y + 40, name, 36, "end"))
-        b.append(rect(x0, y, sx(a) - x0, 34, OR_L, 6))
-        b.append(rect(x0, y + 40, max(sx(c) - x0, 8), 34, OR_D, 6))
-        b.append(t(sx(a) + 12, y + 29, f"{a:.1f}", 30, "start", 400, MUTE))
-        b.append(t(max(sx(c), x0 + 8) + 12, y + 69, f"{c:.1f}", 30, "start", 700, OR_D))
-        b.append(t(w - 10, y + 52, f"{1 - c / a:.0%} gone", 40, "end", 700, NAVY))
-    b.append(t(x0, h - 14, "Places the target gained over its clean twin", 32, "start", 400, MUTE))
+        b.append(t(lx, y + 38, name, 34, "end"))
+        b.append(rect(x0, y, sx(a) - x0, 30, OR_L, 5))
+        b.append(rect(x0, y + 36, max(sx(c) - x0, 8), 30, OR_D, 5))
+        b.append(t(sx(a) + 12, y + 26, f"{a:.1f}", 28, "start", 400, MUTE))
+        b.append(t(max(sx(c), x0 + 8) + 12, y + 62, f"{c:.1f}", 28, "start", 700, OR_D))
+        b.append(t(w - 10, y + 48, f"{1 - c / a:.0%} gone", 38, "end", 700, NAVY))
+    b.append(t((x0 + x1) / 2, h - 10, "Places gained over the clean twin", 32, "middle", 700, MUTE))
     return w, h, svg(w, h, b)
 
 
@@ -91,25 +106,29 @@ def residue():
     """Share of the push left after one clean update, reused vs new adapters."""
     w, h = 1430, 500
     rows = [(-8.7, 27.6), (-6.9, 39.5), (13.4, 38.1), (13.3, 25.3)][::-1]
-    names = ATTACKS
     x0, x1, lo, hi = 440, 1330, -10, 50
     sx = lambda v: x0 + (v - lo) / (hi - lo) * (x1 - x0)
-    b = [dot(x0 + 16, 34, GREY, 15), t(x0 + 44, 46, "Reuse one adapter", 34),
-         dot(x0 + 430, 34, NAVY, 14, "diamond"), t(x0 + 462, 46, "New adapter per update", 34)]
-    top, step = 130, 80
-    b.append(rect(sx(lo), top - 40, sx(0) - sx(lo), 4 * step, GREY_T))
+    b = [dot(x0 + 16, 30, GREY, 14), t(x0 + 42, 41, "Reuse one adapter", 32),
+         dot(x0 + 420, 30, NAVY, 13, "diamond"), t(x0 + 450, 41, "New adapter per update", 32)]
+    top, step = 118, 74
+    base = top + 4 * step - 34
+    b.append(rect(sx(lo), top - 38, sx(0) - sx(lo), base - top + 38, GREY_T))
+    b.append(t(sx(-5), top - 12, "below clean", 24, "middle", 400, MUTE))
     for v in (-10, 0, 10, 20, 30, 40, 50):
-        b.append(ln(sx(v), top - 40, sx(v), top + 4 * step - 40, INK if v == 0 else GRID, 3 if v == 0 else 2))
-        b.append(t(sx(v), top + 4 * step - 2, f"{v}%".replace("-", "−"), 32, "middle", 400, MUTE))
-    for k, (name, (reuse, new)) in enumerate(zip(names, rows)):
+        if v != lo:
+            b.append(ln(sx(v), top - 38, sx(v), base, INK if v == 0 else GRID, 2))
+        b.append(ln(sx(v), base, sx(v), base + 12, INK, 3))
+        b.append(t(sx(v), base + 42, f"{v}%".replace("-", "−"), 30, "middle", 400, MUTE))
+    b.append(axis(sx(lo), top - 38, sx(lo), base))
+    b.append(axis(sx(lo), base, x1, base))
+    for k, (name, (reuse, new)) in enumerate(zip(ATTACKS, rows)):
         y = top + k * step
-        b.append(t(x0 - 30, y + 12, name, 36, "end"))
+        b.append(t(sx(lo) - 22, y + 12, name, 34, "end"))
         b.append(ln(sx(reuse), y, sx(new), y, NAVY_T, 10))
-        b.append(dot(sx(reuse), y, GREY, 16))
-        b.append(dot(sx(new), y, NAVY, 15, "diamond"))
-        b.append(t(sx(new) + 30, y + 12, f"{new:.0f}%", 34, "start", 700, NAVY))
-    b.append(t((x0 + x1) / 2, h - 12, "Share of the push still there after one clean update (grey area: below clean)",
-               30, "middle", 400, MUTE))
+        b.append(dot(sx(reuse), y, GREY, 15))
+        b.append(dot(sx(new), y, NAVY, 14, "diamond"))
+        b.append(t(sx(new) + 28, y + 12, f"{new:.0f}%", 32, "start", 700, NAVY))
+    b.append(t((sx(lo) + x1) / 2, h - 10, "Share of the push left after one clean update", 32, "middle", 700, MUTE))
     return w, h, svg(w, h, b)
 
 
@@ -117,29 +136,35 @@ def rollback():
     """Target's places above the clean run with the poisoned adapter kept or deleted."""
     w, h = 1430, 480
     kept, gone = [2.18, 0.74, 0.24, 0.19], [0.10, -1.16, -1.45, -1.85]
-    x0, x1, y0, y1 = 120, 1000, 380, 40
-    sx = lambda i: x0 + i / 3 * (x1 - x0)
+    x0, x1, y0, y1 = 190, 1010, 370, 30
+    pad = 50
+    sx = lambda i: x0 + pad + i / 3 * (x1 - x0 - 2 * pad)
     sy = lambda v: y0 + (v + 2.5) / 5 * (y1 - y0)
     zero = [(sx(i), sy(0)) for i in range(4)]
     b = [area([(sx(i), sy(v)) for i, v in enumerate(kept)], zero, "#FCEBDD"),
          area(zero, [(sx(i), sy(v)) for i, v in enumerate(gone)], "#E3EBF6")]
     for v in (-2, -1, 1, 2):
         b.append(ln(x0, sy(v), x1, sy(v)))
-        b.append(t(x0 - 18, sy(v) + 11, f"+{v}" if v > 0 else f"−{-v}", 32, "end", 400, MUTE))
-    b.append(ln(x0, sy(0), x1, sy(0), INK, 4))
-    b.append(t(x0 - 18, sy(0) + 11, "0", 32, "end", 400, MUTE))
+    for v in (-2, -1, 0, 1, 2):
+        b.append(ln(x0 - 12, sy(v), x0, sy(v), INK, 3))
+        b.append(t(x0 - 20, sy(v) + 11, "0" if v == 0 else (f"+{v}" if v > 0 else f"−{-v}"), 30, "end", 400, MUTE))
+    b.append(ln(x0, sy(0), x1, sy(0), MUTE, 3, "10 8"))
+    b.append(axis(x0, y1, x0, y0))
+    b.append(axis(x0, y0, x1, y0))
     for i in range(4):
-        b.append(t(sx(i), y0 + 58, f"Update {i + 1}", 34, "middle", 400, MUTE))
+        b.append(ln(sx(i), y0, sx(i), y0 + 12, INK, 3))
+        b.append(t(sx(i), y0 + 44, str(i + 1), 30, "middle", 400, MUTE))
     b.append(poly([(sx(i), sy(v)) for i, v in enumerate(kept)], OR))
     b.append(poly([(sx(i), sy(v)) for i, v in enumerate(gone)], NAVY))
     for i, v in enumerate(kept):
         b.append(dot(sx(i), sy(v), OR, 14))
     for i, v in enumerate(gone):
         b.append(dot(sx(i), sy(v), NAVY, 13, "square"))
-    b.append(t(x1 + 34, sy(kept[-1]) - 16, "Kept: +0.2", 40, "start", 700, OR_D))
-    b.append(t(x1 + 34, sy(0) + 40, "Clean run", 34, "start", 400, MUTE))
-    b.append(t(x1 + 34, sy(gone[-1]) + 14, "Deleted: −1.9", 40, "start", 700, NAVY))
-    b.append(t(x0 + 20, sy(2.5) + 6, "Places above the clean run", 32, "start", 400, MUTE))
+    b.append(t(x1 + 30, sy(kept[-1]) - 14, "Kept: +0.2", 38, "start", 700, OR_D))
+    b.append(t(x1 + 30, sy(0) + 38, "Clean run = 0", 32, "start", 400, MUTE))
+    b.append(t(x1 + 30, sy(gone[-1]) + 14, "Deleted: −1.9", 38, "start", 700, NAVY))
+    b.append(ytitle(48, (y0 + y1) / 2, "Places vs clean"))
+    b.append(t((x0 + x1) / 2, h - 10, "Update (1 = poisoned, 2–4 = clean)", 32, "middle", 700, MUTE))
     return w, h, svg(w, h, b)
 
 
@@ -151,32 +176,37 @@ def dose():
               [0.063, 0.146, 0.239, 0.399, 0.417, 0.526]]
     mean = [sum(c) / 3 for c in zip(*series)]
     lo_, hi_ = [min(c) for c in zip(*series)], [max(c) for c in zip(*series)]
-    x0, x1, y0, y1 = 120, 1250, 360, 40
+    x0, x1, y0, y1 = 190, 1280, 360, 30
+    pad = 40
     a, b_ = math.log2(0.25), math.log2(5)
-    sx = lambda d: x0 + (math.log2(d) - a) / (b_ - a) * (x1 - x0)
+    sx = lambda d: x0 + pad + (math.log2(d) - a) / (b_ - a) * (x1 - x0 - 2 * pad)
     sy = lambda v: y0 + v / 0.6 * (y1 - y0)
     b = []
-    for v in (0, 0.2, 0.4, 0.6):
+    for v in (0.2, 0.4, 0.6):
         b.append(ln(x0, sy(v), x1, sy(v)))
-        b.append(t(x0 - 18, sy(v) + 11, f"{v:.0%}", 32, "end", 400, MUTE))
+    for v in (0, 0.2, 0.4, 0.6):
+        b.append(ln(x0 - 12, sy(v), x0, sy(v), INK, 3))
+        b.append(t(x0 - 20, sy(v) + 11, f"{v:.0%}", 30, "end", 400, MUTE))
     b.append(area([(sx(d), sy(v)) for d, v in zip(doses, hi_)], [(sx(d), sy(v)) for d, v in zip(doses, lo_)], "#DCE6F3"))
     b.append(ln(sx(1), y1, sx(1), y0, MUTE, 3, "10 8"))
-    b.append(t(sx(1) - 16, y1 + 30, "Clear in all", 32, "end", 700, MUTE))
-    b.append(t(sx(1) - 16, y1 + 68, "three domains", 32, "end", 700, MUTE))
+    b.append(t(sx(1) - 16, y1 + 30, "Clear in all", 30, "end", 700, MUTE))
+    b.append(t(sx(1) - 16, y1 + 66, "three domains", 30, "end", 700, MUTE))
     b.append(poly([(sx(d), sy(v)) for d, v in zip(doses, mean)], NAVY))
     for d, v in zip(doses, mean):
         b.append(dot(sx(d), sy(v), NAVY, 14))
     for d, v in zip(doses, mean):
-        if d in (1, 3, 5):
-            dx, anc = {1: (24, "start"), 3: (0, "middle"), 5: (-6, "end")}[d]
-            if d == 1:
-                b.append(t(sx(d) + dx, sy(v) + 46, f"{v:.0%}", 36, anc, 700, NAVY))
-                continue
-            b.append(t(sx(d) + dx, sy(v) - 30, f"{v:.0%}", 36, anc, 700, NAVY))
+        if d == 1:
+            b.append(t(sx(d) + 24, sy(v) + 46, f"{v:.0%}", 34, "start", 700, NAVY))
+        elif d in (3, 5):
+            b.append(t(sx(d) + (0 if d == 3 else -6), sy(v) - 28, f"{v:.0%}", 34, "middle" if d == 3 else "end", 700, NAVY))
+    b.append(axis(x0, y1, x0, y0))
+    b.append(axis(x0, y0, x1, y0))
     for d in doses:
-        b.append(t(sx(d), y0 + 46, f"{d:g}%", 34, "middle", 400, MUTE))
-    b.append(t((x0 + x1) / 2, h - 12, "Poisoned share of the update   ·   line: mean of 3 domains, band: range",
-               30, "middle", 400, MUTE))
+        b.append(ln(sx(d), y0, sx(d), y0 + 12, INK, 3))
+        b.append(t(sx(d), y0 + 44, f"{d:g}%", 30, "middle", 400, MUTE))
+    b.append(t(x1 - 10, y0 - 18, "line: mean of 3 domains · band: range", 26, "end", 400, MUTE))
+    b.append(ytitle(48, (y0 + y1) / 2, "Gap to #1 closed"))
+    b.append(t((x0 + x1) / 2, h - 10, "Poisoned share of the update (log scale)", 32, "middle", 700, MUTE))
     return w, h, svg(w, h, b)
 
 
@@ -241,8 +271,8 @@ def render(out, name, w, h, markup):
 if __name__ == "__main__":
     out = pathlib.Path(sys.argv[1])
     out.mkdir(parents=True, exist_ok=True)
-    for name, fn in [("washout-v2", washout), ("residue-v2", residue), ("rollback-v2", rollback),
-                     ("dose-v2", dose), ("attacks-v3", attacks)]:
+    for name, fn in [("washout-v4", washout), ("residue-v4", residue), ("rollback-v4", rollback),
+                     ("dose-v4", dose), ("attacks-v3", attacks)]:
         w, h, m = fn()
         render(out, name, w, h, m)
         print(name, w, h)
