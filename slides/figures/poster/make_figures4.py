@@ -411,7 +411,7 @@ def dose():
     for d in DOSES:
         b.append(ln(sx(d), y0, sx(d), y0 + 10, INK, 3))
         b.append(t(sx(d), y0 + 36, f"{d:g}%", S, "middle", 500, MUTE))
-    b.append(t((x0 + x1) / 2, H - 4, "Share of the update poisoned (log scale)", S, "middle", 700, MUTE))
+    b.append(t((x0 + x1) / 2, H - 4, "Share of the update that is fake (log scale)", S, "middle", 700, MUTE))
     b.append(ytitle(24, (y0 + y1) / 2, "Climb toward #1"))
     for name, n, reach, col, mk, ys in DOM[::-1]:
         pts = [(sx(d), sy(v)) for d, v in zip(DOSES, ys)]
@@ -420,7 +420,7 @@ def dose():
             b.append(dot(x, y, col, 11, mk))
     lx = 950
     b.append(rect(lx - 18, 2, W - lx + 16, 444, WHITE, 18, INK, 3))
-    b.append(t(lx, 40, "Top-5 reach at a 3% dose", L - 2, "start", 700, INK))
+    b.append(t(lx, 40, "Top-5 reach with 3% fake data", L - 2, "start", 700, INK))
     bw_max = W - lx - 110
     for k, (name, n, reach, col, mk, ys) in enumerate(DOM):
         y = 96 + k * 104
@@ -439,7 +439,7 @@ def stack():
     cw = (W - 4 * g) / 5
     xs = [k * (cw + g) for k in range(5)]
     b = []
-    blocks = [("Block 0", "first training", LGREEN, INK), ("Block 1", "+ poison", RED, WHITE),
+    blocks = [("Block 0", "first training", LGREEN, INK), ("Block 1", "+ fake data", RED, WHITE),
               ("Block 2", "clean", LGREEN, INK), ("Block 3", "clean", LGREEN, INK), ("Block 4", "clean", LGREEN, INK)]
     for k, (a, c, f, col) in enumerate(blocks):
         b.append(rect(xs[k] + 2, 2, cw - 4, 84, f, 16, INK, 3))
@@ -472,7 +472,7 @@ def stack():
         if k < 4:
             b.append(arrow(xs[k] + cw - 2, yb + ch / 2, xs[k + 1] + 2, yb + ch / 2, INK, 3, head=8))
     yl = yb + ch + 44
-    lg = [(MBLUE, "learns"), (GREY, "fixed"), (RED, "learns the poisoned update"), (LRED, "still holds that poison")]
+    lg = [(MBLUE, "learns"), (GREY, "fixed"), (RED, "learns the attacked update"), (LRED, "still holds the attack")]
     x = 0
     for f, s in lg:
         b.append(rect(x, yl - 25, 32, 32, f, 8, INK, 2))
@@ -525,7 +525,7 @@ def render(out, name, w, h, markup):
 
 
 FIGS = [("v4-pipeline", pipeline), ("v4-poison", poison), ("v4-attacks", attacks), ("v5-model", model),
-        ("v5-lora", lora), ("v4-washout", washout), ("v5-dose", dose), ("v4-stack", stack), ("v5-residue", residue)]
+        ("v5-lora", lora), ("v4-washout", washout), ("v6-dose", dose), ("v6-stack", stack), ("v5-residue", residue)]
 
 if __name__ == "__main__":
     out = pathlib.Path(sys.argv[1]).resolve()
